@@ -1,0 +1,45 @@
+CADCalc cleanup — what changed
+================================
+
+1. Fixed: "SVG → DXF" export was fake.
+   Before: it just took the raw SVG markup and saved it with a .dxf
+   extension. That file was not DXF at all — no CAD program could
+   open it.
+   Now: it walks the actual on-screen drawing (lines, circles, rects,
+   polygons, ellipses, and paths — including arcs and curves) and
+   writes a real ASCII DXF file, using the same entity writer that
+   already worked correctly for the Scan→CAD export. Construction
+   guides (dashed reference lines) and small marker dots are skipped
+   automatically so the exported file only contains real geometry.
+   I tested the arc math numerically (endpoint-to-center conversion,
+   including the Y-axis mirror between screen space and DXF space) —
+   it round-trips exactly.
+
+2. Not changed: the DXF parser still loads from a CDN
+   (cdn.jsdelivr.net), so DXF *import* still needs an internet
+   connection the first time in a session. I looked for a way to
+   bundle the real dxf-parser library locally for you (so it'd work
+   fully offline via file:///C:/CADCalc/index.html), but I couldn't
+   reach a downloadable copy of the actual library file through my
+   tools — GitHub's repo has since reorganized and no longer ships a
+   plain dist/ bundle at the URL the project originally pointed to.
+   If you want full offline support:
+     - Open https://cdn.jsdelivr.net/npm/dxf-parser@1.1.2/dist/dxf-parser.js
+       in a browser, save it as dxf-parser.js next to index.html.
+     - Change the <script src="https://cdn.jsdelivr.net/..."> line
+       near the top of index.html to <script src="dxf-parser.js">.
+   Until then, the app works fine as long as you're online the first
+   time you use a DXF-related tool.
+
+3. Not included here: manifest.json, sw.js, fonts.css.
+   These three files in your upload aren't part of CADCalc — they're
+   leftovers from a different project of yours (a PDF viewer/ink
+   editor with OCR support). index.html never references any of
+   them. I left them out of this folder; delete them from your
+   C:\CADCalc folder too, they're just clutter there.
+
+4. dxf-parser_browser.js: also left out.
+   It was a placeholder stub, never actually loaded by index.html
+   (the app loads the parser from the CDN instead). Safe to delete
+   unless you follow step 2 above, in which case replace it with the
+   real downloaded file.
